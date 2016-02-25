@@ -1,0 +1,24 @@
+--------------------------------------------------------
+--  DDL for Table UDT_FCSTED_COLLS_NOT_SETUP
+--------------------------------------------------------
+
+  CREATE TABLE "SCPOMGR"."UDT_FCSTED_COLLS_NOT_SETUP" 
+   (	"LOC" VARCHAR2(50 CHAR), 
+	"ITEM" VARCHAR2(50 CHAR), 
+	"TOTAL_QTY" NUMBER, 
+	"CATEGORY" NUMBER(*,0), 
+	"DAY1_QTY" NUMBER, 
+	"DAY2_QTY" NUMBER, 
+	"DAY3_QTY" NUMBER, 
+	"DAY4_QTY" NUMBER, 
+	"DAY5_QTY" NUMBER, 
+	"DAY6_QTY" NUMBER, 
+	"DAY7_QTY" NUMBER, 
+	"DAY8_QTY" NUMBER, 
+	"DAY9_QTY" NUMBER, 
+	"DAY10_QTY" NUMBER, 
+	"DAY11_QTY" NUMBER, 
+	"DAY12_QTY" NUMBER, 
+	"DAY13_QTY" NUMBER, 
+	"DAY14_QTY" NUMBER
+   )

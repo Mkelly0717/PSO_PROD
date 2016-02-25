@@ -1,0 +1,7 @@
+--------------------------------------------------------
+--  Constraints for Table UDT_DEMAND_DETAIL_REPORT_OLD
+--------------------------------------------------------
+
+  ALTER TABLE "SCPOMGR"."UDT_DEMAND_DETAIL_REPORT_OLD" MODIFY ("STATE" NOT NULL ENABLE)
+  ALTER TABLE "SCPOMGR"."UDT_DEMAND_DETAIL_REPORT_OLD" MODIFY ("DEST" NOT NULL ENABLE)
+  ALTER TABLE "SCPOMGR"."UDT_DEMAND_DETAIL_REPORT_OLD" MODIFY ("ITEM" NOT NULL ENABLE)

@@ -1,0 +1,8 @@
+--------------------------------------------------------
+--  Constraints for Table UDT_DIRECTION
+--------------------------------------------------------
+
+  ALTER TABLE "SCPOMGR"."UDT_DIRECTION" ADD CONSTRAINT "UDT_DIRECTION_PK" PRIMARY KEY ("U_DIRECTION")
+  USING INDEX  ENABLE
+  ALTER TABLE "SCPOMGR"."UDT_DIRECTION" MODIFY ("DESCRIPTION" NOT NULL ENABLE)
+  ALTER TABLE "SCPOMGR"."UDT_DIRECTION" MODIFY ("U_DIRECTION" NOT NULL ENABLE)

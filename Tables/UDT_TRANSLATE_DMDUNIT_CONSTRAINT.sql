@@ -1,0 +1,7 @@
+--------------------------------------------------------
+--  Constraints for Table UDT_TRANSLATE_DMDUNIT
+--------------------------------------------------------
+
+  ALTER TABLE "SCPOMGR"."UDT_TRANSLATE_DMDUNIT" ADD CONSTRAINT "UDT_TRANSLATE_DMDUNIT_PK1" PRIMARY KEY ("U_SAP_IDENTIFIER", "REGION_PRODUCT")
+  USING INDEX  ENABLE
+  ALTER TABLE "SCPOMGR"."UDT_TRANSLATE_DMDUNIT" MODIFY ("REGION_PRODUCT" NOT NULL ENABLE)

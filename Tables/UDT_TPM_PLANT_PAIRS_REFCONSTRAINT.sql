@@ -1,0 +1,8 @@
+--------------------------------------------------------
+--  Ref Constraints for Table UDT_TPM_PLANT_PAIRS
+--------------------------------------------------------
+
+  ALTER TABLE "SCPOMGR"."UDT_TPM_PLANT_PAIRS" ADD CONSTRAINT "UDT_TPM_PLANT_PAIRS_LOC_FK1" FOREIGN KEY ("SOURCE")
+	  REFERENCES "SCPOMGR"."LOC" ("LOC") ENABLE
+  ALTER TABLE "SCPOMGR"."UDT_TPM_PLANT_PAIRS" ADD CONSTRAINT "UDT_TPM_PLANT_PAIRS_LOC_FK2" FOREIGN KEY ("DEST")
+	  REFERENCES "SCPOMGR"."LOC" ("LOC") ENABLE

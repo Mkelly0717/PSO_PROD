@@ -1,0 +1,8 @@
+--------------------------------------------------------
+--  Constraints for Table UDT_TPM_PLANT_PAIRS
+--------------------------------------------------------
+
+  ALTER TABLE "SCPOMGR"."UDT_TPM_PLANT_PAIRS" MODIFY ("SOURCE" NOT NULL ENABLE)
+  ALTER TABLE "SCPOMGR"."UDT_TPM_PLANT_PAIRS" MODIFY ("DEST" NOT NULL ENABLE)
+  ALTER TABLE "SCPOMGR"."UDT_TPM_PLANT_PAIRS" ADD CONSTRAINT "UDT_TPM_PLANT_PAIRS_PK" PRIMARY KEY ("SOURCE", "DEST")
+  USING INDEX  ENABLE

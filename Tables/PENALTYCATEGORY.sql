@@ -1,0 +1,17 @@
+--------------------------------------------------------
+--  DDL for Table PENALTYCATEGORY
+--------------------------------------------------------
+
+  CREATE TABLE "SCPOMGR"."PENALTYCATEGORY" 
+   (	"CATEGORY" NUMBER(*,0), 
+	"DESCR" VARCHAR2(50 CHAR) DEFAULT ' ', 
+	"RESKEY" VARCHAR2(50 CHAR), 
+	"SKUSW" NUMBER(1,0) DEFAULT 0, 
+	"RESSW" NUMBER(1,0) DEFAULT 0, 
+	"PRODUCTIONSW" NUMBER(1,0) DEFAULT 0, 
+	"SOURCINGSW" NUMBER(1,0) DEFAULT 0, 
+	"UOMCATEGORY" NUMBER(*,0) DEFAULT 0, 
+	"PERUOMCATEGORY" NUMBER(*,0) DEFAULT 0
+   ) 
+
+   COMMENT ON COLUMN "SCPOMGR"."PENALTYCATEGORY"."RESKEY" IS 'Resource bundle key'

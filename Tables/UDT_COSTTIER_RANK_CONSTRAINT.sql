@@ -1,0 +1,8 @@
+--------------------------------------------------------
+--  Constraints for Table UDT_COSTTIER_RANK
+--------------------------------------------------------
+
+  ALTER TABLE "SCPOMGR"."UDT_COSTTIER_RANK" MODIFY ("VALUE" NOT NULL ENABLE)
+  ALTER TABLE "SCPOMGR"."UDT_COSTTIER_RANK" MODIFY ("SOURCE" NOT NULL ENABLE)
+  ALTER TABLE "SCPOMGR"."UDT_COSTTIER_RANK" MODIFY ("DEST" NOT NULL ENABLE)
+  ALTER TABLE "SCPOMGR"."UDT_COSTTIER_RANK" MODIFY ("COST" NOT NULL ENABLE)
