@@ -1,0 +1,18 @@
+{
+    "contents" : "setwd(\"C:/SQLDEVELOPER_CODE_PROD/MAK_CUST_TABLE\")\n\n\ndf_sm_table <- read.csv(\"MAK_SM_TABLE.csv\", header=TRUE, sep=\"|\")\nnames(df_sm_table) <- tolower(names(df_sm_table))\ndf_sm_table$schedarrivdate <- as.Date(df_sm_table$schedarrivdate)\nstr(df_sm_table)\n\ndf <- df_sm_table[df_sm_table$schedarrivdate >= as.Date('2016-03-08'),]\n#                  & substr(df_sm_table$item,1,4) ==\"4055\"\ndf$pf <- as.factor(df$p1)\ndf$durf <- as.factor(df$dur)\ndf$p1 <- df$pf\ndf$dur <- df$durf\ndf <- df[,c(\"item\",\"schedarrivdate\",\"sm_totqty\",\"vl_qty_used\",\"co_qty_used\",\"durf\",\"sourcing\",\"distance\",\"pf\",\"source\")]\nstr(df)\n\n#d2 <- df[,c(\"item\",\"schedarrivdate\",\"distance\",\"pf\")]\n#str(d2)\n\nplot(df$item, df$distance)\nplot(df$sourcing, df$distance)\nplot(df$pf, df$distance)\nplot(df$distance, df$vl_qty_used)\nplot(df$distance, df$co_qty_used)\nplot(df$schedarrivdate, df$distance)\nplot(df$durf, df$distance)\ndf_src_gt_200 <- df[df$distance>600,]\nplot(df_src_gt_200$source, df_src_gt_200$distance)\n\n\np1_counts <- table(as.numeric(df$p1))\np1_counts\nhead(df)\ndfp0 <- aggregate(sm_totqty ~ sourcing, df[df$p1==\"0\",], sum)\ndfp1 <- aggregate(sm_totqty ~ sourcing, df[df$p1==\"1\",], sum)\ndfp2 <- aggregate(sm_totqty ~ sourcing, df[df$p1==\"2\",], sum)\n\nsub1 <- aggregate(distance ~ schedarrivdate, df[ (df$p1==0)\n                                                    & df$schedarrivdate>=as.Date('2016-03-08'),], mean)\nsub2 <- aggregate(distance ~ schedarrivdate, df[ (df$p1==1)\n                                                    & df$schedarrivdate>=as.Date(\"2016-03-08\"),], mean)\nsub3 <- aggregate(distance ~ schedarrivdate, df[ (df$p1==2)\n                                                    & df$schedarrivdate>=as.Date(\"2016-03-08\"),], mean)\n###############################################################################\n# Plot the Distance by each Date\n################################################################################\nplot(sub1$schedarrivdate, sub1$distance\n              , type=\"b\"\n              , main=\"Hist of Average Distance by Schedarrivdate\"\n              , col=\"blue\"\n              , pch=19\n              , ylim=c(0,400)\n              , lwd=4)\nlines(sub2$schedarrivdate, sub2$distance\n         , col=\"red\"\n         , pch=19\n         , lwd=4)\nlines(sub3$schedarrivdate, sub3$distance\n         , col=\"black\"\n         , lwd=4)\nlegend(\"topleft\", lty = c(1,1,1)\n                , lwd=c(2.5,2.5,2.5)\n                , col = c(\"blue\", \"red\", \"black\")\n                , legend = c(\"P1=doesn't match\", \"P1=matches\", \"P1=doesn't exist\"))\nabline(h=c(100),lwd=4)",
+    "created" : 1456777175740.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1202163603",
+    "id" : "30A42AD8",
+    "lastKnownWriteTime" : 1457466147,
+    "path" : "C:/SQLDEVELOPER_CODE_PROD/MAK_CUST_TABLE/Analysis of SM Table.R",
+    "project_path" : "Analysis of SM Table.R",
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "type" : "r_source"
+}

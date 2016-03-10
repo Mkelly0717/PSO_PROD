@@ -1,0 +1,7 @@
+--        dbms_output.put_line('A: '|| del_rec.loc|| '-' || del_rec.co_item|| '-' || del_rec.vll_source|| '-' ||  del_rec.shipdate );
+--        dbms_output.put_line('B: ' || sm_lane_rec.dest||'-'||sm_lane_rec.item||'-'||sm_lane_rec.eff||'-'||sm_lane_rec.remainder);
+--       dbms_output.put_line('A: '||  ord_rec.loc|| '-' || ord_rec.co_item|| '-' || ord_rec.shipdate || '-' || ord_rec.co_qty );
+--       dbms_output.put_line('B: ' || sm_plant_rec.recnum||'-'|| sm_plant_rec.dest||'-'||sm_plant_rec.item||'-'||sm_plant_rec.eff||'-'||sm_plant_rec.remainder);  
+--       dbms_output.put_line('A: '||  del_rec.loc|| '-' || del_rec.co_item|| '-' || del_rec.shipdate || '-' || del_rec.co_qty );
+--       dbms_output.put_line('B: ' || sm_lane_rec.recnum||'-'|| sm_lane_rec.dest||'-'||sm_lane_rec.item||'-'||sm_lane_rec.eff||'-'||sm_lane_rec.remainder); 
+--        dbms_output.put_line('C: ' || sm_lane_rec.recnum||'-'|| sm_lane_rec.dest||'-'||sm_lane_rec.item||'-'||sm_lane_rec.eff||'-'||sm_lane_rec.remainder); 

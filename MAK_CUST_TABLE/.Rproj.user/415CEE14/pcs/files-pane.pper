@@ -1,0 +1,13 @@
+{
+    "path" : "C:/SQLDEVELOPER_CODE_PROD/MAK_CUST_TABLE",
+    "sortOrder" : [
+        {
+            "ascending" : false,
+            "columnIndex" : 4
+        },
+        {
+            "ascending" : true,
+            "columnIndex" : 2
+        }
+    ]
+}
