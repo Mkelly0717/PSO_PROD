@@ -5,10 +5,18 @@ set define off;
 
   CREATE OR REPLACE PROCEDURE "SCPOMGR"."MAK_ASSIGN_ORDERS_SMA" 
 is
+
+v_simulation_name varchar2(50);  -- Assign Simulation to use
+
 begin
+
+
+  select chrval1 into v_simulation_name 
+    from udt_default_parameters dfp
+    where dfp.name='SIMULATION_NAME' ;
+  
   execute immediate 'truncate table scpomgr.mak_cust_table';
-  execute immediate
-  'insert into mak_cust_table   
+  insert into mak_cust_table   
 ( status, sm_record, co_item, loc, shipdate, schedshipdate, schedarrivdate
  ,co_orderid, co_qty, u_sales_document, u_ship_condition, u_dmdgroup_code
  ,vl_orderid, loadid, vll_dest, vll_source, vll_qty, vll_item
@@ -16,9 +24,9 @@ begin
  )
 (   select case when vll.u_overallsts is null 
                       and co.shipdate >= trunc(sysdate)then 0
-                when vll.u_overallsts = ''A'' 
+                when vll.u_overallsts = 'A' 
                       and co.shipdate >= trunc(sysdate)then 0
-                when vll.u_overallsts = ''C'' 
+                when vll.u_overallsts = 'C' 
                       and co.shipdate >= trunc(sysdate)then 9
                 when co.shipdate < trunc(sysdate) then 10
                 else 0
@@ -41,18 +49,19 @@ begin
          , vll.qty vll_qty
          , vll.item vll_item
          , vll.u_overallsts
-         , case when vll.u_overallsts = ''C'' then ''INTRANSIT''
-                else '' ''
+         , case when vll.u_overallsts = 'C' then 'INTRANSIT'
+                else ' '
           end sourcing
      from custorder co , vehicleloadline vll,  loc l
     where co.orderid    = vll.orderid(+) 
       and l.loc = co.loc 
-      and l.u_area = ''NA'' 
-)';
+      and l.u_area = 'NA' 
+);
 commit;  
 
 execute immediate 'truncate table scpomgr.mak_sm_418_table';  
-execute immediate 'insert into mak_sm_418_table
+--execute immediate 'insert into mak_sm_418_table
+insert into mak_sm_418_table
   (  recnum  , item  , dest  , source, sourcing , eff  , sm_totqty  , remainder
    , vl_qty_used  , co_qty_used, p1, dur
   )
@@ -78,16 +87,16 @@ execute immediate 'insert into mak_sm_418_table
                , round( sum( sm.value ), 2 ) sm_totqty
             from sim_sourcingmetric sm, loc ls, loc ld
             where ls.loc = sm.source
-              and ls.u_area = ''NA''
+              and ls.u_area = 'NA'
               and ld.loc = sm.dest
-              and ld.u_area = ''NA''
+              and ld.u_area = 'NA'
               and sm.category = 418
               and sm.value > 0
-              and sm.simulation_name=''AD''
+              and sm.simulation_name= v_simulation_name
           group by sm.item, sm.dest, sm.source, sm.sourcing, sm.dur, sm.eff
           order by item, dest, sm.dur, sm.eff asc, sourcing asc   
         )smv
-  )' ;
+  ) ;
   commit;
   
 ------------------------------------------------------

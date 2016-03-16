@@ -5,7 +5,11 @@ set define off;
 
   CREATE OR REPLACE PROCEDURE "SCPOMGR"."U_11_SKU_STORAGE" as
 
+v_initial_date date;
+
 begin
+
+select v_init_eff_date into v_initial_date from dual;
 
 /******************************************************************
 ** Part 1: create Res Records                                     * 
@@ -178,7 +182,7 @@ from resconstraint c
   , (select r.res
       , r.loc
       , t.maxcap qty
-      , v_init_eff_date eff
+      , v_initial_date eff
       , 12 category
     from tmp_storage_capacity t
       , res r
@@ -214,7 +218,7 @@ into igpmgr.intins_respenalty
       , timeuom
     )
 select 'U_11_SKU_STORAGE_PART8'
-  ,v_init_eff_date eff
+  ,v_initial_date eff
   , 35 rate
   , 112 category
   , r.res

@@ -68,7 +68,7 @@ commit;
 /* Adjust the  tier Value to be 50 % of the actual value 
    For P1 values which are not already the lower cost lane */
 execute immediate 'truncate table mak_COSTTIER_table';
-execute immediate 'insert into MAK_COSTTIER_TABLE 
+insert into MAK_COSTTIER_TABLE 
 (COST, SOURCE, DEST, VALUE, EFF, RANK)
   select cost ,
     source,
@@ -78,13 +78,15 @@ execute immediate 'insert into MAK_COSTTIER_TABLE
     dense_rank() over (partition by dest order by value asc) rank
   FROM mak_costtier_view
   order by dest ,
-    rank';
+    rank;
 
 execute immediate 'truncate table UDT_COSTTIER_P1_ADJUSTMENTS';
-execute immediate 'insert into UDT_COSTTIER_P1_ADJUSTMENTS
+insert into UDT_COSTTIER_P1_ADJUSTMENTS
 ( cost, value, new_value)
 select cost, value, new_value
-from UDv_COSTTIER_P1_ADJUSTMENTS';
+from UDv_COSTTIER_P1_ADJUSTMENTS;
+
+
 update costtier ct
 set CT.value =
   (select new_value

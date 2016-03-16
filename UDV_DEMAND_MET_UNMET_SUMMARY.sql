@@ -1,3 +1,7 @@
+--------------------------------------------------------
+--  DDL for View UDV_DEMAND_MET_UNMET_SUMMARY
+--------------------------------------------------------
+
   CREATE OR REPLACE VIEW "SCPOMGR"."UDV_DEMAND_MET_UNMET_SUMMARY" ("CATEGORY", "TOTAL_QTY", "TOTAL_NUMBER", "%Total_Number") AS 
   select
     case category

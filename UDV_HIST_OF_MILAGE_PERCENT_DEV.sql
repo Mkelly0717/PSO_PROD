@@ -1,3 +1,7 @@
+--------------------------------------------------------
+--  DDL for View UDV_HIST_OF_MILAGE_PERCENT_DEV
+--------------------------------------------------------
+
   CREATE OR REPLACE VIEW "SCPOMGR"."UDV_HIST_OF_MILAGE_PERCENT_DEV" ("RUNDATE", "SCHEDSHIPDATE", "SCHEDARRIVDATE", "PLANNDAY", "000-049", "050-099", "100-149", "150-199", "200-249", "250-299", "300-349", "350-399", "400-499", "450-499", "500+", "TOT_LOADS", "TOT_QTY", "AVG_DAILY_QTY", "TOTAL_MILAGE", "AVG_MILAGE", "STDDEV_MILAGE", "TOTAL_COST", "AVG_COST", "STDDEV_COST", "AVG_COST_PER_MILE", "AVG_COST_PER_LOAD", "VG_COST_PER_PALLET") AS 
   with dates as
   ( select distinct trunc( eff ) schedshipdate

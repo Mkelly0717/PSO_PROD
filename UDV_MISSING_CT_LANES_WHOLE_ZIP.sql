@@ -1,3 +1,6 @@
+--------------------------------------------------------
+--  DDL for View UDV_MISSING_CT_LANES_WHOLE_ZIP
+--------------------------------------------------------
 
   CREATE OR REPLACE VIEW "SCPOMGR"."UDV_MISSING_CT_LANES_WHOLE_ZIP" ("PC_SOURCE", "PC_DEST") AS 
   select distinct l.postalcode as pc_source

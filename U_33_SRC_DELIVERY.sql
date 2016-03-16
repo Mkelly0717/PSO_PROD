@@ -186,4 +186,49 @@ and d.item is null;
 
 commit;
 
+
+/*******************************************************************************
+** Part 12: Add in the Deliveries for Stock Transfers
+*******************************************************************************/
+
+--insert into igpmgr.intups_sourcing (item, dest, source, transmode, eff,     factor, arrivcal,     majorshipqty,     minorshipqty,     enabledyndepsw,     shrinkagefactor,     maxshipqty,     abbr,     sourcing,     disc,     
+--    maxleadtime,     minleadtime,     priority,     enablesw,     yieldfactor,     supplyleadtime,     costpercentage,     supplytransfercost,     nonewsupplydate,     shipcal,     
+--    ff_trigger_control,     pullforwarddur,     splitqty,     loaddur,     unloaddur,     reviewcal,     uselookaheadsw,     convenientshipqty,     convenientadjuppct,     convenientoverridethreshold,     
+--    roundingfactor,     ordergroup,     ordergroupmember,     lotsizesenabledsw,     convenientadjdownpct)
+--
+--
+--select distinct u.item, u.dest, u.source, 'TRUCK' transmode, scpomgr.u_jan1970 eff,     1 factor,    ' ' arrivcal,     0 majorshipqty,     0 minorshipqty,     1 enabledyndepsw,     0 shrinkagefactor,     0 maxshipqty,     
+--    ' ' abbr, 'STX9DEL' sourcing,     scpomgr.u_jan1970 disc,     1440 * 365 * 100 maxleadtime,     u.minleadtime,     1 priority,     1 enablesw,     100 yieldfactor,     0 supplyleadtime,     
+--    100 costpercentage,     0 supplytransfercost,     scpomgr.u_jan1970 nonewsupplydate,     ' ' shipcal,    ''  ff_trigger_control,     0 pullforwarddur,     0 splitqty,     0 loaddur,     0 unloaddur,    
+--    ' ' reviewcal,     1 uselookaheadsw,     0 convenientshipqty,     0 convenientadjuppct,     0 convenientoverridethreshold,     0 roundingfactor,     ' ' ordergroup,     ' ' ordergroupmember,     0 lotsizesenabledsw,     
+--    0 convenientadjdownpct
+--from                     
+--    (
+--    
+--    
+--    select item, dest, source, max(minleadtime) minleadtime
+--    from
+--                
+--          (select vll.item, vll.dest, vll.source, 
+--            case when schedarrivdate-schedshipdate < 1 then 0 else (schedarrivdate-schedshipdate)*1440 end minleadtime
+--          from vehicleloadline vll, vehicleload vl, loc d, loc s
+--          where vll.loadid = vl.loadid
+--          and vll.dest <> vll.source
+--          and vll.dest = d.loc
+--          and vll.source=s.loc
+--          and vll.schedshipdate >= trunc(sysdate)
+--          and d.u_area = 'NA'
+--          and s.u_area='NA'
+--          and d.loc_type in ('2','4')
+--          and s.loc_type in ('2','4')
+--          and vl.sourcestatus = 1
+--          )
+--                  
+--    group by item, dest, source  
+--
+--    ) u;
+--    
+--    commit;
+
+
 end;

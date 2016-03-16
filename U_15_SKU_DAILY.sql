@@ -5,8 +5,14 @@ set define off;
 
   CREATE OR REPLACE PROCEDURE "SCPOMGR"."U_15_SKU_DAILY" as
 
+
+v_safetystock_pen number;
+
 begin
 
+  select numval1 into v_safetystock_pen
+    from UDT_DEFAULT_PARAMETERS DFP
+    where dfp.name='SAFETYSTOCK_PEN' ;
 --updated (for NA - 10/20/105)
 -- must run store sku projections first 
 
@@ -169,8 +175,8 @@ commit;
 
 insert into skupenalty (eff, rate, category, item, loc, currencyuom, qtyuom)
 
-select distinct v_init_eff_date eff
-  , 40 rate
+select distinct V_INIT_EFF_DATE EFF
+  , v_safetystock_pen rate
   , 105 category
   , u.item
   , u.loc
@@ -187,4 +193,38 @@ from
     
 commit;
 
+/* Substract Category 6 qty's which were duplicated from skuprojection 
+  NOTE!! This should only be run 1 time.
+     Running this multiple times, will repeatedly substract from cat 6.
+     After running this, you must reprocess the skuconstraint table.
+*/
+merge into skuconstraint skco
+using (
+ select dels.item, dels.dest, dels.schedarrivdate, dels.qty vll_qty , skc.qty skc_qty
+   from  skuconstraint skc,
+        (select vll.item, vll.dest, vll.schedarrivdate, sum( vll.qty ) qty
+           from vehicleloadline vll, loc l
+           where u_overallsts = 'C' 
+             and l.loc = vll.dest 
+             and l.u_area = 'NA' 
+             and l.loc_type         = 3
+           group by vll.item, vll.dest, vll.schedarrivdate
+        ) dels
+ where skc.loc = dels.dest 
+   and skc.item = dels.item 
+   and skc.eff = dels.schedarrivdate 
+   and skc.category = 6
+) skci
+on (     skci.item=skco.item 
+     and skci.dest=skco.loc 
+     and skci.schedarrivdate = skco.eff 
+     and skco.category=6
+    )
+when matched then update set skco.qty = decode( sign(skco.qty - skci.vll_qty)
+                                                ,+1,skco.qty - skci.vll_qty
+                                                ,-1,0
+                                                ,0,0
+                                         );
+
+commit;
 end;

@@ -1,3 +1,7 @@
+--------------------------------------------------------
+--  DDL for View UDV_PLANARRIV_SOURCING_BY_DATE
+--------------------------------------------------------
+
   CREATE OR REPLACE VIEW "SCPOMGR"."UDV_PLANARRIV_SOURCING_BY_DATE" ("EFF", "SOURCING", "COUNT", "QTY") AS 
   with DATES as
   ( SELECT DISTINCT eff FROM sim_sourcingmetric sm

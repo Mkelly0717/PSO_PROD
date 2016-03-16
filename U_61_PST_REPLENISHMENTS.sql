@@ -61,8 +61,8 @@ from
     and c.value > 0
     and c.item = y.item
     and c.loc = y.loc
-    and c.productionmethod = y.productionmethod
-	abd c.simulation_name='AD'
+    and C.PRODUCTIONMETHOD = Y.PRODUCTIONMETHOD
+	and c.simulation_name='AD'
     );
     
 commit;

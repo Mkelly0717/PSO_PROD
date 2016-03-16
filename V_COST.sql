@@ -8,32 +8,45 @@
         v_cost number :=-1;
         v_errm varchar2(64);
         v_code number;
-    begin
-        select  ct.cost_pallet
-        into v_cost
-        from loc ls, loc ld, udt_cost_transit_na ct
-        where ls.loc=in_source
-          and ld.loc=in_dest
-          and ct.dest_pc=ld.postalcode 
-          and ct.source_pc=ls.postalcode
-          and ct.direction=' '
-          and ct.u_equipment_type=decode(ld.u_equipment_type,'FB','FB','VN'); 
-          
-        if  v_cost = -1 then 
-           select  ct.cost_pallet into v_cost
-             from loc ls, loc ld, udt_cost_transit_na ct
-            where ls.loc=in_source
-              and ld.loc=in_dest
-              and ct.dest_geo=ld.u_3digitzip 
-              and ct.source_geo=ls.u_3digitzip
-              and ct.direction=' '
-              and ct.u_equipment_type=decode(ld.u_equipment_type,'FB','FB','VN');
-        end if;  
-
-        return nvl(v_cost,-2);
+    BEGIN
+    
+      begin
+        SELECT CT.COST_PALLET INTO V_COST
+          FROM LOC LS, LOC LD, UDT_COST_TRANSIT_NA CT
+         WHERE LS.LOC=IN_SOURCE
+          AND LD.LOC=IN_DEST
+                       AND CT.DEST_PC=LD.POSTALCODE 
+                       AND CT.SOURCE_PC=LS.POSTALCODE
+                       AND CT.DIRECTION=' '
+                       AND CT.U_EQUIPMENT_TYPE=DECODE(LD.U_EQUIPMENT_TYPE,'FB','FB','VN');
+          RETURN V_COST;
+         EXCEPTION WHEN NO_DATA_FOUND THEN GOTO THREE_ZIP;
+       END;
+       
+         /* Come here if not data was found for the 5 digit zip */
+          <<three_zip>>
+          begin
+             SELECT  CT.COST_PALLET INTO V_COST
+               FROM LOC LS, LOC LD, UDT_COST_TRANSIT_NA CT
+              WHERE LS.LOC=IN_SOURCE
+                AND LD.LOC=IN_DEST
+                AND CT.DEST_GEO=LD.U_3DIGITZIP 
+                AND CT.SOURCE_GEO=LS.U_3DIGITZIP
+                AND CT.DIRECTION=' '
+                AND CT.U_EQUIPMENT_TYPE=DECODE(LD.U_EQUIPMENT_TYPE,'FB','FB','VN');
+               RETURN V_COST;
+           EXCEPTION
+          WHEN NO_DATA_FOUND THEN
+               RETURN SQLCODE;
+          WHEN OTHERS THEN
+           v_code :=  sqlcode;
+           V_ERRM := SUBSTR(SQLERRM, 1 , 64);
+           DBMS_OUTPUT.PUT_LINE('The error code is ' || V_CODE || '- ' || V_ERRM);
+          RETURN V_CODE;
+          end;
 
     exception
-    when no_data_found then
+    WHEN NO_DATA_FOUND THEN
          return sqlcode;
     when others then
          v_code :=  sqlcode;

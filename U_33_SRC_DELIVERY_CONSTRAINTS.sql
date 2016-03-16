@@ -5,8 +5,25 @@ set define off;
 
   CREATE OR REPLACE PROCEDURE "SCPOMGR"."U_33_SRC_DELIVERY_CONSTRAINTS" as
 
+
+v_delivery_issues_pen number;
+v_delivery_ai_collections_pen number;
+v_delivery_aw_collections_pen number;
 begin
 
+    
+  select numval1 into v_delivery_issues_pen
+    from udt_default_parameters dfp
+    where dfp.name='DELIVERY_ISSUES_PENALTY' ;
+    
+  select numval1 into v_delivery_ai_collections_pen
+    from udt_default_parameters dfp
+    where dfp.name='DELIVERY_AI_COLLECTIONS_PENALTY' ;
+
+  select numval1 into v_delivery_aw_collections_pen
+    from udt_default_parameters dfp
+    where dfp.name='DELIVERY_AW_COLLECTIONS_PENALTY' ;
+    
 delete res 
     where substr(res, 1, 3) = 'DEL'
     and loc in (select loc from loc where u_area = 'NA');
@@ -165,9 +182,14 @@ order by res,endeff;
 
 commit;
 
-insert into  respenalty (eff, rate, category, res, qtyuom, timeuom, currencyuom)
+insert into  igpmgr.intups_respenalty (eff, rate, category, res, qtyuom, timeuom, currencyuom)
 
-select distinct scpomgr.u_jan1970 eff, 9000 rate, u.category, u.res, 18 qtyuom, 0 timeuom, 15 currencyuom
+select distinct scpomgr.u_jan1970 eff, case when u.res like '%RU%' then v_delivery_issues_pen
+                                            when u.res like '%AI%' then v_delivery_ai_collections_pen
+                                            when u.res like '%AW%' then v_delivery_aw_collections_pen
+                                            else 10
+                                        end rate
+                , u.category, u.res, 18 qtyuom, 0 timeuom, 15 currencyuom
 from respenalty r,
     
     (select distinct  r.res, cc.category
@@ -181,9 +203,8 @@ from respenalty r,
     ) u
     
 where scpomgr.u_jan1970 = r.eff (+)
-and u.category = r.category (+)
-and u.res = r.res (+)
-and r.res is null;
+AND U.CATEGORY = R.CATEGORY (+)
+AND U.RES = R.RES (+);
     
 commit;
 

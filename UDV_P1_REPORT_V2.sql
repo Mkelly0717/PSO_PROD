@@ -1,3 +1,7 @@
+--------------------------------------------------------
+--  DDL for View UDV_P1_REPORT_V2
+--------------------------------------------------------
+
   CREATE OR REPLACE VIEW "SCPOMGR"."UDV_P1_REPORT_V2" ("RDATE", "SM_DEST", "SM_ITEM", "SM_RANK", "SM_VALUE", "CT_RANK", "CT_COST", "LS_PRIORITY", "SM_SRC", "CT_SOURCE_PC", "CT_DEST_PC", "SM_SOURCING", "CT_ET", "CT_DIR", "CT_TLT", "LS_TLT", "LS_EQPTYPE") AS 
   WITH src_metric (sourcing, item, dest, src, qty, rank) AS
   (

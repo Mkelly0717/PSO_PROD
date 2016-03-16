@@ -29,7 +29,7 @@ execute immediate 'truncate table skusafetystockparam';
 
 execute immediate 'truncate table skuplanningparam';
 
-execute immediate 'delete table sim_skumetric where simulation_name='AD';
+execute immediate 'delete table sim_skumetric where simulation_name=''AD''';
 commit;
 
 execute immediate 'truncate table skupenalty';

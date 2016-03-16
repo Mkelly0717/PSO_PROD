@@ -1,3 +1,7 @@
+--------------------------------------------------------
+--  DDL for View UDV_PE_TO_P1_MATCH_ARIVDT
+--------------------------------------------------------
+
   CREATE OR REPLACE VIEW "SCPOMGR"."UDV_PE_TO_P1_MATCH_ARIVDT" ("SCHEDARRIVDATE", "CNT_M", "CNT_U", "CNT_NE", "CNT_DM", "CNT_DU", "CNT_DNE", "QTY_M", "QTY_U", "QTY_NE", "QTY_DM", "QTY_DU", "QTY_DN", "TOT_ORD_CNT", "TOT_DEL_CNT", "TOT_ORD_QTY", "TOT_DEL_QTY", "PERCENT_CNT", "PERCENT_QTY") AS 
   with dates as
   ( select distinct TRUNC( EFF ) SCHEDARRIVDATE

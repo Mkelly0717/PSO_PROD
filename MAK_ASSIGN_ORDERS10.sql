@@ -72,13 +72,14 @@ execute immediate 'insert into mak_sm_table
                , sm.dur
                , sm.eff
                , round( sum( sm.value ), 2 ) sm_totqty
-            from sourcingmetric sm, loc ls, loc ld
+            from sim_sourcingmetric sm, loc ls, loc ld
             where ls.loc = sm.source
               and ls.u_area = ''NA''
               and ld.loc = sm.dest
               and ld.u_area = ''NA''
               and sm.category = 418
               and sm.value > 0
+              and sm.simulation_name=''AD''
           group by sm.item, sm.dest, sm.source, sm.dur, sm.eff
           order by item, dest, sm.dur, sm.eff asc   
         )smv
@@ -457,13 +458,14 @@ commit;
                , sm.sourcing
                , sm.eff
                , round( sum( sm.value ), 2 ) sm_totqty
-            from sourcingmetric sm, loc ls, loc ld
+            from sim_sourcingmetric sm, loc ls, loc ld
             where ls.loc = sm.source
               and ls.u_area = ''NA''
               and ld.loc = sm.dest
               and ld.u_area = ''NA''
               and sm.category = 417
               and sm.value > 0
+              and sm.simulation_name=''AD''
           group by sm.item, sm.dest, sm.source, sm.sourcing, sm.eff
           order by item, dest, sm.eff asc   
         )smv

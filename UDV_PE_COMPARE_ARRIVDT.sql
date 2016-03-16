@@ -1,3 +1,7 @@
+--------------------------------------------------------
+--  DDL for View UDV_PE_COMPARE_ARRIVDT
+--------------------------------------------------------
+
   CREATE OR REPLACE VIEW "SCPOMGR"."UDV_PE_COMPARE_ARRIVDT" ("SCHEDARRIVDATE", "CNT->", "CNT_M", "CNT_U", "CNT_NE", "CNT_DM", "CNT_DU", "CNT_DNE", "QTY->", "QTY_M", "QTY_U", "QTY_NE", "QTY_DM", "QTY_DU", "QTY_DN", "TOTALS->  ", "TOT_ORD_CNT", "TOT_DEL_CNT", "TOT_ORD_QTY", "TOT_DEL_QTY", "Percent->", "PERCENT_CNT", "PERCENT_QTY", "MET INFO=>", "CO_CNT", "PA_CNT", "CO_QTY", "PA_QTY", "DEL_CNT", "PD_CNT", "DEL_QTY", "PD_QTY", "%MET INFO=>", "%CO_MET", "%CO_QTY_MET", "%DEL_MET", "%DELQTY_MET") AS 
   with dates as
   ( select distinct TRUNC( EFF ) SCHEDARRIVDATE

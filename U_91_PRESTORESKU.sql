@@ -70,6 +70,17 @@ delete skuprojstatic
     
 commit;
 
+/* Update the The Order qty to match the vehicleload qty */
+--merge into custorder co
+--using
+--( SELECT vll.orderid, vll.qty
+--  from vehicleloadline vll, loc l
+--  where l.loc=vll.dest
+--    and l.u_area='NA' 
+--) vllq on (vllq.orderid = co.orderid)
+--when matched then update 
+--    set co.qty = vllq.qty;
+--commit;    
 
 /* Run this code to set the order qty to agree with the vehicle load qty.*/
 UPDATE custorder co1
@@ -92,12 +103,41 @@ WHERE EXISTS
   WHERE co1.orderid =co.orderid
   and vll.orderid =co.orderid
   and vll.qty    <> co.qty
-  and vll.u_overallsts='C'
+--  and vll.u_overallsts='C'
   and l.loc=co.loc
   and l.u_area='NA'
 );
 
 commit;
+
+/* Remove from vehicleloadline sourcestatus 3 records where the 
+   custorder shipdate is before the onhandpost date 
+   and the schedarrivdate is on or after the onhandpost
+   date.
+*/
+--delete from vehicleload vl
+--where vl.loadid in 
+--(select vll.loadid
+--from vehicleloadline vll, loc l, custorder co
+--where l.loc=vll.dest
+--  and l.u_area='NA'
+--  and vll.item like '4055RU%'
+--  and co.orderid=vll.orderid 
+--  and vll.u_overallsts='C'
+--  and vll.schedarrivdate > co.shipdate
+--);
+--delete from vehicleload vll
+--where vll.loadid in 
+--(select vll.loadid
+--from vehicleloadline vll, loc l, custorder co
+--where l.loc=vll.dest
+--  and l.u_area='NA'
+--  and vll.item like '4055RU%'
+--  and co.orderid=vll.orderid 
+--  and vll.u_overallsts='C'
+--  and vll.schedarrivdate > co.shipdate
+--);
+--commit;
 
 /*
 01/25/2016 - JB - added below logic to set custorder order duration to 4 days and maxcustordersysdur to 10 days for SUN - WED.  In order to span weekends they are set to 6 and 8 days respectivley THU - SAT  

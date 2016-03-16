@@ -6,9 +6,8 @@
   with dates as
   ( select distinct trunc( eff ) needarrivdate
      from sim_sourcingmetric sm
-    where category = 418 and sm.eff between trunc( sysdate ) and trunc( sysdate
-    ) + 14
-    and sm.simulation_name='AD'
+    where category                = 418 and sm.eff between trunc( sysdate ) and trunc( sysdate
+    ) + 14 and sm.simulation_name = 'AD'
  order by trunc( eff ) asc
   )                               , data as
   (select trunc( sysdate ) rundate, pe.co_orderid    , pe.loadid, pe.co_qty
@@ -64,6 +63,6 @@
   avg_cost_per_load, nvl( round( sum( data.cost_pallet ) / sum( data.co_qty ),
   2 ), 0 ) avg_cost_per_pallet
    from data data, dates dates
-  where dates.needarrivdate = data.needarrivdate (+) 
-group by data.rundate, data.plannday, dates.needarrivdate
+  where dates.needarrivdate = data.needarrivdate (+)
+group by data.RUNDATE, data.PLANNDAY, DATES.NEEDARRIVDATE
 order by dates.needarrivdate asc

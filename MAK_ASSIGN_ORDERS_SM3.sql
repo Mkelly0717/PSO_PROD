@@ -7,14 +7,18 @@ set define off;
 is
 begin
   execute immediate 'truncate table scpomgr.mak_cust_table';
-  execute immediate
-  'insert into mak_cust_table   
-( status, sm_record, co_item, loc, shipdate, schedshipdate, schedarrivdate, co_orderid, co_qty, u_sales_document
- ,u_ship_condition, u_dmdgroup_code, vl_orderid, loadid, vll_dest, vll_source
- ,vll_qty, vll_item,  u_overallsts, sourcing )
-(   select case when vll.u_overallsts is null and co.shipdate >= trunc(sysdate)then 0
-                when vll.u_overallsts = ''A'' and co.shipdate >= trunc(sysdate)then 0
-                when vll.u_overallsts = ''C'' and co.shipdate >= trunc(sysdate)then 9
+insert into mak_cust_table   
+( status, sm_record, co_item, loc, shipdate, schedshipdate, schedarrivdate
+ ,co_orderid, co_qty, u_sales_document, u_ship_condition, u_dmdgroup_code
+ ,vl_orderid, loadid, vll_dest, vll_source, vll_qty, vll_item
+ ,u_overallsts, sourcing 
+ )
+(   select case when vll.u_overallsts is null 
+                      and co.shipdate >= trunc(sysdate)then 0
+                when vll.u_overallsts = 'A' 
+                      and co.shipdate >= trunc(sysdate)then 0
+                when vll.u_overallsts = 'C' 
+                      and co.shipdate >= trunc(sysdate)then 9
                 when co.shipdate < trunc(sysdate) then 10
                 else 0
            end status
@@ -36,17 +40,14 @@ begin
          , vll.qty vll_qty
          , vll.item vll_item
          , vll.u_overallsts
-         , case when vll.u_overallsts = ''C'' then ''INTRANSIT''
-                else '' ''
+         , case when vll.u_overallsts = 'C' then 'INTRANSIT'
+                else ' '
           end sourcing
      from custorder co , vehicleloadline vll,  loc l
     where co.orderid    = vll.orderid(+) 
       and l.loc = co.loc 
-      and l.u_area = ''NA'' 
---      and co.item like ''%RU%''
- --     and co.shipdate >= trunc(sysdate)
---      and ( vll.u_overallsts is null or vll.u_overallsts=''A'')
-)';
+      and l.u_area = 'NA' 
+);
 commit;  
 
 execute immediate 'truncate table scpomgr.mak_sm_418_table';  
@@ -101,6 +102,13 @@ when matched then
    update set smt.p1=1;
 commit;
   
+update mak_sm_418_table mct
+  set p1=2
+where not exists ( select 1 
+                     from udt_llamasoft_data ll 
+                    where ll.item=mct.item 
+                      and ll.dest=mct.dest);
+commit;
 
   ------------------------------------------------------------------------------
   -- Declare the cursors
@@ -271,15 +279,18 @@ commit;
 -----------------------------------------------------------------------------
 
     for del_rec in cur_del_orders loop
-        open cur_get_sm_lane ( del_rec.loc, del_rec.co_item, del_rec.vll_source, del_rec.shipdate);
+        open cur_get_sm_lane ( del_rec.loc
+                              ,del_rec.co_item
+                              ,del_rec.vll_source
+                              ,del_rec.shipdate);
         fetch cur_get_sm_lane into sm_lane_rec;
---        dbms_output.put_line('A: '|| del_rec.loc|| '-' || del_rec.co_item|| '-' || del_rec.vll_source|| '-' ||  del_rec.shipdate );
---        dbms_output.put_line('B: ' || sm_lane_rec.dest||'-'||sm_lane_rec.item||'-'||sm_lane_rec.eff||'-'||sm_lane_rec.remainder);
+
         if cur_get_sm_lane%found then
            if (      sm_lane_rec.remainder - del_rec.co_qty >= 0 
                 or ( sm_lane_rec.remainder >= 0.8 * del_rec.co_qty) ) then
                 sm_lane_rec.remainder := sm_lane_rec.remainder - del_rec.co_qty;
-                sm_lane_rec.vl_qty_used :=  sm_lane_rec.vl_qty_used + del_rec.co_qty;
+                sm_lane_rec.vl_qty_used := sm_lane_rec.vl_qty_used 
+                                            + del_rec.co_qty;
  
                 updatesm( p_remainder => sm_lane_rec.remainder 
                          ,p_co_qty    => sm_lane_rec.co_qty_used
@@ -315,9 +326,9 @@ commit;
           if  (     sm_plant_rec.remainder - ord_rec.co_qty >= 0 
                 or (sm_plant_rec.remainder >= 0.8 * ord_rec.co_qty)) then
                 sm_plant_rec.remainder := sm_plant_rec.remainder - ord_rec.co_qty;
-                sm_plant_rec.co_qty_used :=  sm_plant_rec.co_qty_used + ord_rec.co_qty;
---       dbms_output.put_line('A: '||  ord_rec.loc|| '-' || ord_rec.co_item|| '-' || ord_rec.shipdate || '-' || ord_rec.co_qty );
---       dbms_output.put_line('B: ' || sm_plant_rec.recnum||'-'|| sm_plant_rec.dest||'-'||sm_plant_rec.item||'-'||sm_plant_rec.eff||'-'||sm_plant_rec.remainder);         
+                sm_plant_rec.co_qty_used :=  sm_plant_rec.co_qty_used 
+                                              + ord_rec.co_qty;
+       
                 updatesm( p_remainder => sm_plant_rec.remainder 
                          ,p_co_qty    => sm_plant_rec.co_qty_used
                          ,p_vl_qty    => sm_plant_rec.vl_qty_used
@@ -364,13 +375,20 @@ commit;
 -- Add More Deliveries Status=3
 ------------------------------------------------------------
     for del_rec in cur_del_orders loop
-        open cur_get_sm_lane ( del_rec.loc, del_rec.co_item, del_rec.vll_source, del_rec.shipdate);
+        open cur_get_sm_lane ( del_rec.loc
+                              ,del_rec.co_item
+                              ,del_rec.vll_source
+                              ,del_rec.shipdate
+                             );
         fetch cur_get_sm_lane into sm_lane_rec;
 
         if cur_get_sm_lane%found then
                 
           <<cl_loop>>
-          for cl_rec in  cur_sm_unused( sm_lane_rec.item, sm_lane_rec.source, sm_lane_rec.eff) loop      
+          for cl_rec in  cur_sm_unused( sm_lane_rec.item
+                                       ,sm_lane_rec.source
+                                       ,sm_lane_rec.eff
+                                       ) loop      
             if  (     cl_rec.remainder - del_rec.co_qty >= 0 
                  or ( cl_rec.remainder >= 0.8 * del_rec.co_qty)) then
                  
@@ -402,9 +420,15 @@ commit;
 ------------------------------------------------------------
     for ex_rec in cur_open_orders loop
         <<plant_loop_s4>>
-        for plant_rec in cur_plant_list ( ex_rec.loc, ex_rec.co_item, ex_rec.shipdate) loop
+        for plant_rec in cur_plant_list ( ex_rec.loc
+                                         ,ex_rec.co_item
+                                         ,ex_rec.shipdate
+                                         ) loop
           
-          for cl_rec in  cur_sm_unused( plant_rec.item, plant_rec.source, plant_rec.eff) loop      
+          for cl_rec in  cur_sm_unused( plant_rec.item
+                                       ,plant_rec.source
+                                       ,plant_rec.eff
+                                       ) loop      
           
              if (    cl_rec.remainder - ex_rec.co_qty >= 0 
                 or ( cl_rec.remainder >= 0.8 * ex_rec.co_qty ) )then
@@ -436,17 +460,20 @@ commit;
 -----------------------------------------------------------------------------
 
     for del_rec in cur_del_orders loop
-        open cur_get_sm_lane ( del_rec.vll_dest, del_rec.co_item, del_rec.vll_source , del_rec.shipdate);
+        open cur_get_sm_lane ( del_rec.vll_dest
+                              ,del_rec.co_item
+                              ,del_rec.vll_source
+                              ,del_rec.shipdate
+                              );
         fetch cur_get_sm_lane into sm_lane_rec;
---       dbms_output.put_line('A: '||  del_rec.loc|| '-' || del_rec.co_item|| '-' || del_rec.shipdate || '-' || del_rec.co_qty );
 
         if cur_get_sm_lane%found then
---       dbms_output.put_line('B: ' || sm_lane_rec.recnum||'-'|| sm_lane_rec.dest||'-'||sm_lane_rec.item||'-'||sm_lane_rec.eff||'-'||sm_lane_rec.remainder);          
+         
            if del_rec.co_item like '%AI%'  then
                 sm_lane_rec.remainder := sm_lane_rec.remainder - del_rec.co_qty;
-                sm_lane_rec.vl_qty_used :=  sm_lane_rec.vl_qty_used + del_rec.co_qty;
+                sm_lane_rec.vl_qty_used :=  sm_lane_rec.vl_qty_used 
+                                               + del_rec.co_qty;
  
---        dbms_output.put_line('C: ' || sm_lane_rec.recnum||'-'|| sm_lane_rec.dest||'-'||sm_lane_rec.item||'-'||sm_lane_rec.eff||'-'||sm_lane_rec.remainder);      
                 updatesm( p_remainder => sm_lane_rec.remainder 
                          ,p_co_qty    => sm_lane_rec.co_qty_used
                          ,p_vl_qty    => sm_lane_rec.vl_qty_used
@@ -478,11 +505,10 @@ commit;
         fetch cur_collection_lanes into sm_collection_rec;
         exit sm_coll_loop when cur_collection_lanes%notfound; 
         
---          if  (     sm_collection_rec.remainder - ord_rec.co_qty >= 0 
---                or (sm_collection_rec.remainder >= 0.8 * ord_rec.co_qty)) then
            if ord_rec.co_item like '%AI%'  then                
-                sm_plant_rec.remainder := sm_plant_rec.remainder - ord_rec.co_qty;
-                sm_plant_rec.co_qty_used :=  sm_plant_rec.co_qty_used + ord_rec.co_qty;
+              sm_plant_rec.remainder := sm_plant_rec.remainder - ord_rec.co_qty;
+              sm_plant_rec.co_qty_used :=  sm_plant_rec.co_qty_used 
+                                              + ord_rec.co_qty;
                   
                 updatesm( p_remainder => sm_collection_rec.remainder 
                          ,p_co_qty    => sm_collection_rec.co_qty_used
@@ -637,6 +663,24 @@ when matched then
 commit;
 
 
+merge into mak_cust_table mct
+using (
+    select item, source, dest
+      from udt_llamasoft_data 
+) LL
+on ( mct.co_item=ll.item and mct.assigned_plant=ll.source and mct.loc=ll.dest)
+when matched then
+   update set MCT.P1=1;
+commit;
+
+update mak_cust_table mct
+  set p1=2
+where not exists ( select 1 
+                     from udt_llamasoft_data ll 
+                    where ll.item=mct.co_item 
+                      and ll.dest=mct.loc);
+commit;
+
 ---------------------------------------------------------------------------
 ---------------------------------------------------------------------------
         update mak_cust_table co
@@ -645,12 +689,11 @@ commit;
             and co.u_sales_document='Z1AA'
             and co.u_ship_condition='Z2'
             and TRIM(CO.SOURCING) is not null
-            and CO.SHIPDATE <= TRUNC(sysdate) + 3;
+            and CO.SHIPDATE <= TRUNC(sysdate) + 5;
             
           commit;
---
---
---
+
+
        update mak_cust_table co
             set co.sourcing = 'UNPLANNED'
               , co.minleadtime=0
@@ -672,17 +715,31 @@ commit;
               , co.minleadtime=0
           where co.status = 10;
           commit;
-          
-        
+
+/* Assign the Rate type 
+===> Need to re-write I am missing ISS1EXCL and ISS9DEL LANES
+*/          
+   merge into mak_cust_table peo
+using
+( select co_orderid, U_RATE_TYPE
+  from ( select PE.co_orderid, CT.U_RATE_TYPE
+  from mak_cust_table pe, loc ld, loc ls,
+       UDT_SOURCING_DEFINITIONS SD   , UDT_COST_TRANSIT_NA CT
+ where LD.LOC            = PE.loc
+   and ls.loc            = pe.assigned_plant
+   and ct.u_equipment_type = decode( ld.u_equipment_type, 'FB', 'FB', 'VN')
+   and pe.sourcing    = sd.sourcing
+   and( 
+       ( sd.zip_type in( '5', 'NA' ) and ct.source_pc   = ls.postalcode and ct.dest_pc = ld.postalcode )
+       or( SD.ZIP_TYPE    = '3' and CT.SOURCE_GEO  = LS.U_3DIGITZIP and CT.DEST_GEO    = LD.U_3DIGITZIP )
+   ))
+) ta on (ta.co_orderid = peo.co_orderid)
+when matched then update 
+    set peo.u_rate_type = ta.u_rate_type;
+    
+commit;
+     
 
 
    end;   -- end of procedure mak_assign_orders
 end; -- end of begin
-
-
- --dbms_output.put_line('A: '|| ex_rec.co_orderid || ' ' || ex_rec.loc || '-' || ex_rec.co_item || '-' || ex_rec.shipdate );    
- --dbms_output.put_line('B:' || plant_rec.item||'-'||plant_rec.source || '-' || plant_rec.eff   );
- --dbms_output.put_line('C: '|| vll_extra_rec.remainder ||'-' || ex_rec.co_qty  ); 
- --dbms_output.put_line('D: '|| vll_extra_rec.remainder ||'-' || vll_extra_rec.co_qty_used||'-'||vll_extra_rec.vl_qty_used||'-  '||vll_extra_rec.recnum );
---  dbms_output.put_line(del_rec.co_orderid ||'-' || sm_plant_rec.source||'-'||sm_plant_rec.recnum );
---  dbms_output.put_line(sm_lane_rec.dest||'-'||sm_lane_rec.item||'-'||sm_lane_rec.eff||'-'||sm_lane_rec.remainder);

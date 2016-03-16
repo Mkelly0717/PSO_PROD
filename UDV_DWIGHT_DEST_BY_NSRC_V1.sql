@@ -1,3 +1,7 @@
+--------------------------------------------------------
+--  DDL for View UDV_DWIGHT_DEST_BY_NSRC_V1
+--------------------------------------------------------
+
   CREATE OR REPLACE VIEW "SCPOMGR"."UDV_DWIGHT_DEST_BY_NSRC_V1" ("DEST", "ITEM", "NSOURCES", "QTY_RECIEVED") AS 
   select dest
       , item

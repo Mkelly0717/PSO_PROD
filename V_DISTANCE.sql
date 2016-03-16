@@ -8,7 +8,8 @@
         v_distance number :=-1;
         v_errm     varchar2(64);
         v_code number;
-    begin
+    BEGIN
+      begin
         select  ct.distance
         into v_distance
         from loc ls, loc ld, udt_cost_transit_na ct
@@ -17,9 +18,14 @@
           and ct.dest_pc=ld.postalcode 
           and ct.source_pc=ls.postalcode
           and ct.direction=' '
-          and ct.u_equipment_type=decode(ld.u_equipment_type,'FB','FB','VN'); 
+          AND CT.U_EQUIPMENT_TYPE=DECODE(LD.U_EQUIPMENT_TYPE,'FB','FB','VN'); 
+          return v_distance;
+           EXCEPTION WHEN NO_DATA_FOUND THEN GOTO THREE_ZIP;
+      end;
           
-        if  v_distance = -1 then 
+        /* Come here if not data was found for the 5 digit zip */
+          <<THREE_ZIP>>
+          begin        
            select  ct.distance into v_distance
              from loc ls, loc ld, udt_cost_transit_na ct
             where ls.loc=in_source
@@ -27,10 +33,17 @@
               and ct.dest_geo=ld.u_3digitzip 
               and ct.source_geo=ls.u_3digitzip
               and ct.direction=' '
-              and ct.u_equipment_type=decode(ld.u_equipment_type,'FB','FB','VN');
-        end if;  
-
-        return nvl(v_distance,-2);
+              AND CT.U_EQUIPMENT_TYPE=DECODE(LD.U_EQUIPMENT_TYPE,'FB','FB','VN');
+               RETURN V_distance;
+           EXCEPTION
+          WHEN NO_DATA_FOUND THEN
+               RETURN SQLCODE;
+          WHEN OTHERS THEN
+           v_code :=  sqlcode;
+           V_ERRM := SUBSTR(SQLERRM, 1 , 64);
+           DBMS_OUTPUT.PUT_LINE('The error code is ' || V_CODE || '- ' || V_ERRM);
+          RETURN V_distance;
+          end;
 
     exception
     when no_data_found then

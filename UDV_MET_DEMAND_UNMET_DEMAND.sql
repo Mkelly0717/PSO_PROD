@@ -1,3 +1,7 @@
+--------------------------------------------------------
+--  DDL for View UDV_MET_DEMAND_UNMET_DEMAND
+--------------------------------------------------------
+
   CREATE OR REPLACE VIEW "SCPOMGR"."UDV_MET_DEMAND_UNMET_DEMAND" ("SM_SOURCE", "SM_ITEM", "SM_NDESTS", "SM_QTY_SHIPPED", "SRC_NDESTS", "DEMAND_QTY") AS 
   with shipped ( sm_source, sm_item, sm_ndests, sm_qty_shipped) as
     (select source

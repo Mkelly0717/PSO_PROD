@@ -64,6 +64,7 @@ and pi.recnum=po.recnum
 and co.orderid=pi.u_custorderid
 and pi.qty >= 0.8*co.qty
 );
+commit;
 
 /* Firm PLanned Deliveries as 2's Where qty >= 80% of the order qty 
    -- Added 01-20-2016
