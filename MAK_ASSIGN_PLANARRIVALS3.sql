@@ -94,7 +94,7 @@ and r.item is null;
 
 update vehicleload vl
 set sourcestatus = 0
-where vl.loadid in  ( select loadid from vehicleloadline where source like 'UT%');
+where vl.loadid in  ( select loadid from vehicleloadline where source like 'U%');
 
 
 end;

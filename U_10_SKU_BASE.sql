@@ -26,11 +26,21 @@ set define off;
    19: Update Sku:OHPOST
 */
 
-v_initial_date date;
+v_jda_initial_date date;
+v_begin_date       date;
+v_end_date         date;
+v_today_eff_date   number;
 
 begin
 
-select v_init_eff_date into v_initial_date from dual;
+select v_init_eff_date into v_jda_initial_date from dual;
+
+select trunc(sysdate) into v_begin_date from dual;
+
+select trunc(sysdate) into v_end_date from dual;
+
+select v_date_to_eff(v_begin_date) into v_today_eff_date from dual;
+
 /******************************************************************
 ** Part 1: Create Items                                           *
 
@@ -73,7 +83,7 @@ insert into igpmgr.intins_sku
     , mpbatchnum, seqintenablesw, itemstoregrade, rpbatchnum
 )
 select 'U_10_SKU_BASE_PART2'
-   ,loc_item.item, loc_item.loc, 0 oh, 5 replentype, 1 netchgsw, v_initial_date ohpost
+   ,loc_item.item, loc_item.loc, 0 oh, 5 replentype, 1 netchgsw, v_jda_initial_date ohpost
    ,-1 planlevel, ' ' sourcinggroup, 18 qtyuom, 15 currencyuom
    ,1 storablesw, 1 enablesw, 35 timeuom, ''  ff_trigger_control
    ,0 infcarryfwdsw, 1 minohcovrule, 1 targetohcovrule, ' ' ltdgroup
@@ -107,7 +117,7 @@ insert into igpmgr.intins_sku
     , mpbatchnum, seqintenablesw, itemstoregrade, rpbatchnum
 )
 select 'U_10_SKU_BASE_PART3'
-   ,loc_item.item, loc_item.loc, 0 oh, 5 replentype, 1 netchgsw, v_initial_date ohpost
+   ,loc_item.item, loc_item.loc, 0 oh, 5 replentype, 1 netchgsw, v_jda_initial_date ohpost
    ,-1 planlevel, ' ' sourcinggroup, 18 qtyuom, 15 currencyuom
    ,1 storablesw, 1 enablesw, 35 timeuom, ''  ff_trigger_control
    ,0 infcarryfwdsw, 1 minohcovrule, 1 targetohcovrule, ' ' ltdgroup
@@ -141,7 +151,7 @@ insert into igpmgr.intins_sku
     ,seqintenablesw, itemstoregrade, rpbatchnum
 )
 select 'U_10_SKU_BASE_PART4'
-   ,i.item, l.loc, 0 oh, 5 replentype, 1 netchgsw, v_initial_date ohpost
+   ,i.item, l.loc, 0 oh, 5 replentype, 1 netchgsw, v_jda_initial_date ohpost
    ,-1 planlevel, ' ' sourcinggroup, 18 qtyuom, 15 currencyuom, 1 storablesw
    ,1 enablesw, 35 timeuom, ''  ff_trigger_control, 0 infcarryfwdsw
    ,1 minohcovrule, 1 targetohcovrule, ' ' ltdgroup, 0 infinitesupplysw
@@ -171,7 +181,7 @@ insert into igpmgr.intins_sku
     ,mpbatchnum, seqintenablesw, itemstoregrade, rpbatchnum
 )
 select 'U_10_SKU_BASE_PART5'
-  ,i.item , l.loc , 0 oh , 5 replentype , 1 netchgsw , v_initial_date ohpost
+  ,i.item , l.loc , 0 oh , 5 replentype , 1 netchgsw , v_jda_initial_date ohpost
   ,-1 planlevel , ' ' sourcinggroup , 18 qtyuom , 15 currencyuom 
   ,1 storablesw , 1 enablesw , 35 timeuom , '' ff_trigger_control 
   ,0 infcarryfwdsw , 1 minohcovrule , 1 targetohcovrule , ' ' ltdgroup 
@@ -210,7 +220,7 @@ insert into igpmgr.intins_sku
     ,seqintenablesw, itemstoregrade, rpbatchnum
 )
 select distinct 'U_10_SKU_BASE_PART6'
-   ,i.item, l.loc, 0 oh, 5 replentype, 1 netchgsw, v_initial_date ohpost
+   ,i.item, l.loc, 0 oh, 5 replentype, 1 netchgsw, v_jda_initial_date ohpost
    ,-1 planlevel, ' ' sourcinggroup, 18 qtyuom, 15 currencyuom, 1 storablesw
    ,1 enablesw, 35 timeuom, ''  ff_trigger_control, 0 infcarryfwdsw
    ,1 minohcovrule, 1 targetohcovrule, ' ' ltdgroup, 0 infinitesupplysw
@@ -260,7 +270,7 @@ insert into igpmgr.intins_sku
     ,itemstoregrade, rpbatchnum
 )
 select 'U_10_SKU_BASE_PART7'
-    , u.item, u.loc, 0 oh, 5 replentype, 1 netchgsw, v_initial_date ohpost
+    , u.item, u.loc, 0 oh, 5 replentype, 1 netchgsw, v_jda_initial_date ohpost
     ,-1 planlevel, ' ' sourcinggroup, 18 qtyuom, 15 currencyuom, 1 storablesw
     ,1 enablesw, 35 timeuom, ''  ff_trigger_control, u.infcarryfwdsw
     ,1 minohcovrule, 1 targetohcovrule, ' ' ltdgroup, 0 infinitesupplysw
@@ -275,7 +285,7 @@ from
 --           case when i.u_stock = 'C' then 1 else 0 end infcarryfwdsw
         from fcst f, loc l, item i, dfuview v
         where f.startdate 
-                 between v_demand_start_date and next_day(v_demand_end_date,'SAT')
+                 between v_begin_date and v_end_date
         and l.u_area = 'NA'
         and l.loc_type = 3 
         and l.enablesw = 1 
@@ -311,7 +321,7 @@ insert into igpmgr.intins_sku
     ,itemstoregrade, rpbatchnum
 )
 select 'U_10_SKU_BASE_PART8'
-    , u.item, u.loc, 0 oh, 5 replentype, 1 netchgsw, v_initial_date ohpost
+    , u.item, u.loc, 0 oh, 5 replentype, 1 netchgsw, v_jda_initial_date ohpost
     ,-1 planlevel, ' ' sourcinggroup, 18 qtyuom, 15 currencyuom, 1 storablesw
     ,1 enablesw, 35 timeuom, ''  ff_trigger_control, u.infcarryfwdsw
     ,1 minohcovrule, 1 targetohcovrule, ' ' ltdgroup, 0 infinitesupplysw
@@ -326,7 +336,7 @@ from
 --           case when i.u_stock = 'C' then 1 else 0 end infcarryfwdsw
         from fcst f, loc l, item i, dfuview v
         where f.startdate 
-                between v_demand_start_date and next_day(v_demand_end_date,'SAT')
+                between v_begin_date and v_end_date
         and l.u_area = 'NA'
         and l.loc_type in (2,4)
         and l.enablesw = 1 
@@ -361,7 +371,7 @@ insert into igpmgr.intins_sku
     ,itemstoregrade, rpbatchnum
 )
 select 'U_10_SKU_BASE_PART9'
-    , i.item, l.loc, 0 oh, 5 replentype, 1 netchgsw, v_initial_date ohpost
+    , i.item, l.loc, 0 oh, 5 replentype, 1 netchgsw, v_jda_initial_date ohpost
     ,-1 planlevel, ' ' sourcinggroup, 18 qtyuom, 15 currencyuom, 1 storablesw
     ,1 enablesw, 35 timeuom, ''  ff_trigger_control, 0 infcarryfwdsw
     ,1 minohcovrule, 1 targetohcovrule, ' ' ltdgroup, 0 infinitesupplysw
@@ -405,8 +415,7 @@ from sku s, item i, loc l,
 
     (select distinct f.dmdunit, f.dmdunit item, f.dmdgroup, f.loc dfuloc, f.loc skuloc, startdate, dur, 1 type, 0 supersedesw, ''  ff_trigger_control, sum(qty) totfcst
     from fcst f, dfuview v
-    where f.startdate between v_demand_start_date 
-                          and next_day(v_demand_end_date,'SAT')
+    where f.startdate between v_begin_date and v_end_date
     and f.dmdgroup in ('ISS', 'COL')
     and f.dmdunit = v.dmdunit
     and f.dmdgroup = v.dmdgroup
@@ -445,7 +454,7 @@ from sku s, item i,
 
     (select distinct f.dmdunit, f.dmdunit item, f.dmdgroup, f.loc dfuloc, f.loc skuloc, startdate, dur, 1 type, 0 supersedesw, ''  ff_trigger_control, sum(qty) totfcst
     from fcst f, dfuview v, loc l
-    where f.startdate between v_demand_start_date and next_day(v_demand_end_date,'SAT')
+    where f.startdate between v_begin_date and v_end_date
     and f.dmdgroup in ('ISS')
     and f.dmdunit = v.dmdunit
     and f.dmdgroup = v.dmdgroup
@@ -489,7 +498,7 @@ from sku s, item i, loc l,
               ,f.loc skuloc , startdate, dur, 1 type, 0 supersedesw
               ,''  ff_trigger_control, sum(qty) totfcst
     from fcst f, dfuview v, loc l
-    where f.startdate between v_demand_start_date and next_day(v_demand_end_date,'SAT')
+    where f.startdate between v_begin_date and v_end_date
     and f.dmdgroup in ('TPM')
     and f.dmdunit = v.dmdunit
     and f.dmdgroup = v.dmdgroup
@@ -548,7 +557,7 @@ insert into igpmgr.intins_caldata
    ,perwgt, allocwgt, covdur
 )
 select 'U_10_SKU_BASE_PART14'
-       ,c.cal, ' ' altcal, v_date_to_eff(v_demand_start_date) eff
+       ,c.cal, ' ' altcal, v_today_eff_date eff
        , 6 opt, 0 repeat, 0 avail
        ,'Allocation Calendar' descr, 0 perwgt, 1/7 allocwgt, 0 covdur 
 from cal c, caldata cd, sku s
@@ -649,19 +658,19 @@ insert into igpmgr.intins_skuplannparam
 
 select 'U_10_SKU_BASE_PART17'
     ,s.item, s.loc, 0 atpdur, 3 depdmdopt, 0 externalskusw
-    ,v_initial_date firstreplendate, v_initial_date lastfrzstart
-    ,v_initial_date lastplanstart, 524160 plandur, 0 planleadtime
+    ,v_jda_initial_date firstreplendate, v_jda_initial_date lastfrzstart
+    ,v_jda_initial_date lastplanstart, 524160 plandur, 0 planleadtime
     ,2 planleadtimerule, 0 planshipfrzdur, 0 restrictdur, 0 allocbatchsw
     ,0 cmpfirmdur, 0.9 custservicelevel, 1 maxchangefactor, 0 mfgleadtime
     ,0 recschedrcptsdur, 1 cpppriority, 0 cpplocksw, 1 criticalmaterialsw
     ,2 aggexcesssupplyrule, 1 aggundersupplyrule, 0 bufferleadtime
     ,999999999 maxoh, 1048320 maxcovdur, 10080 drpcovdur, 0 drpfrzdur
-    ,1 drprule, v_initial_date drptimefencedate, 0 drptimefencedur
+    ,1 drprule, v_jda_initial_date drptimefencedate, 0 drptimefencedur
     ,1 incdrpqty, 0 mindrpqty, 10080 mpscovdur, 0 mfgfrzdur, 1 mpsrule
-    ,v_initial_date mpstimefencedate, 0 mpstimefencedur, 1 incmpsqty
-    ,0 minmpsqty, 0 shrinkagefactor, v_initial_date expdate, 1 atprule
-    ,' ' prodcal, v_initial_date prodstartdate
-    ,v_initial_date prodstopdate, 1 orderingcost, 1 holdingcost
+    ,v_jda_initial_date mpstimefencedate, 0 mpstimefencedur, 1 incmpsqty
+    ,0 minmpsqty, 0 shrinkagefactor, v_jda_initial_date expdate, 1 atprule
+    ,' ' prodcal, v_jda_initial_date prodstartdate
+    ,v_jda_initial_date prodstopdate, 1 orderingcost, 1 holdingcost
     ,1 eoq, ''  ff_trigger_control, ' ' workingcal, 0 lookaheaddur
     ,2 orderpointrule, 0 orderskudetailsw, 1048320 supsdmindmdcovdur
     ,1 orderpointminrule, 0 orderpointminqty, 0 orderpointmindur
@@ -703,14 +712,14 @@ select 'U_10_SKU_BASE_PART18'
     ,1 ssrule, 0 statsscsl, 0 ssmeetearlydur, -1 sspriority, 3 tohrule
     ,' ' sstemplate, 1 dmddisttype, 2 cslmetric, 1 calcstatssrule
     ,' ' avgdmdcal, 0 avgdmdlookbwddur, 525600 avgdmdlookfwddur
-    ,1 calcmserule, ' ' dmdcal, v_initial_date dmdpostdate
+    ,1 calcmserule, ' ' dmdcal, v_jda_initial_date dmdpostdate
     ,10080 fcstdur, ''  ff_trigger_control, 0 statsscovlimitdur
     ,1 supersedesssw, 0 msemaskopt, 0 msemaskminval, 100 msemaskmaxval
     ,1 dmdcorrelationfactor, 1440 accumdur, 0 mseabstolerancelimit
     ,' ' dmdalloccal, 1 sspresentationopt, 0 maxsscovskipdur
     ,0 maxssfactor, 1 msemodelopt, 0 sscovusebaseonlysw
-    ,v_initial_date arrivalpostdate, 0 shipdatadur, 0 shiplag
-    ,0 orderlag, v_initial_date orderpostdate, 0 orderdatadur
+    ,v_jda_initial_date arrivalpostdate, 0 shipdatadur, 0 shiplag
+    ,0 orderlag, v_jda_initial_date orderpostdate, 0 orderdatadur
     ,1 allowearlyarrivsw, 1 allowearlyordersw, '' csltemplate
 from skusafetystockparam p, sku s
 where s.enablesw = 1

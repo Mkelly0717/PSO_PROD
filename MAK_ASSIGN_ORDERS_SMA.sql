@@ -7,6 +7,7 @@ set define off;
 is
 
 v_simulation_name varchar2(50);  -- Assign Simulation to use
+v_percent_qty_threshold number;
 
 begin
 
@@ -15,6 +16,10 @@ begin
     from udt_default_parameters dfp
     where dfp.name='SIMULATION_NAME' ;
   
+  select numval1 into v_percent_qty_threshold
+    from udt_default_parameters dfp
+    where dfp.name='PEGGING_QTY_THRESHOLD' ;
+
   execute immediate 'truncate table scpomgr.mak_cust_table';
   insert into mak_cust_table   
 ( status, sm_record, co_item, loc, shipdate, schedshipdate, schedarrivdate
@@ -299,7 +304,7 @@ commit;
 
         if cur_get_sm_lane%found then
            if (      sm_lane_rec.remainder - del_rec.co_qty >= 0 
-                or ( sm_lane_rec.remainder >= 0.8 * del_rec.co_qty) ) then
+                or ( sm_lane_rec.remainder >= v_percent_qty_threshold * del_rec.co_qty) ) then
                 sm_lane_rec.remainder := sm_lane_rec.remainder - del_rec.co_qty;
                 sm_lane_rec.vl_qty_used := sm_lane_rec.vl_qty_used 
                                             + del_rec.co_qty;
@@ -336,7 +341,7 @@ commit;
         exit sm_plant_loop when cur_plant_lanes%notfound; 
 
           if  (     sm_plant_rec.remainder - ord_rec.co_qty >= 0 
-                or (sm_plant_rec.remainder >= 0.8 * ord_rec.co_qty)) then
+                or (sm_plant_rec.remainder >= v_percent_qty_threshold * ord_rec.co_qty)) then
                 sm_plant_rec.remainder := sm_plant_rec.remainder - ord_rec.co_qty;
                 sm_plant_rec.co_qty_used :=  sm_plant_rec.co_qty_used 
                                               + ord_rec.co_qty;
@@ -402,7 +407,7 @@ commit;
                                        ,sm_lane_rec.eff
                                        ) loop      
             if  (     cl_rec.remainder - del_rec.co_qty >= 0 
-                 or ( cl_rec.remainder >= 0.8 * del_rec.co_qty)) then
+                 or ( cl_rec.remainder >= v_percent_qty_threshold * del_rec.co_qty)) then
                  
                 cl_rec.remainder   := cl_rec.remainder   - del_rec.co_qty;
                 cl_rec.vl_qty_used := cl_rec.vl_qty_used + del_rec.co_qty;
@@ -443,7 +448,7 @@ commit;
                                        ) loop      
           
              if (    cl_rec.remainder - ex_rec.co_qty >= 0 
-                or ( cl_rec.remainder >= 0.8 * ex_rec.co_qty ) )then
+                or ( cl_rec.remainder >= v_percent_qty_threshold * ex_rec.co_qty ) )then
 
                 cl_rec.remainder   := cl_rec.remainder   - ex_rec.co_qty;
                 cl_rec.co_qty_used := cl_rec.co_qty_used + ex_rec.co_qty;

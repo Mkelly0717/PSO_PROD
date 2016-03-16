@@ -18,7 +18,7 @@
           and ct.dest_pc=ld.postalcode 
           and ct.source_pc=ls.postalcode
           and ct.direction=' '
-          AND CT.U_EQUIPMENT_TYPE=DECODE(LD.U_EQUIPMENT_TYPE,'FB','FB','VN'); 
+          and ct.u_equipment_type=decode(ld.u_equipment_type,'FB','FB','VN');
           return v_distance;
            EXCEPTION WHEN NO_DATA_FOUND THEN GOTO THREE_ZIP;
       end;
@@ -33,11 +33,15 @@
               and ct.dest_geo=ld.u_3digitzip 
               and ct.source_geo=ls.u_3digitzip
               and ct.direction=' '
-              AND CT.U_EQUIPMENT_TYPE=DECODE(LD.U_EQUIPMENT_TYPE,'FB','FB','VN');
+              and ct.u_equipment_type=decode(ld.u_equipment_type,'FB','FB','VN')
+              and not ls.u_state = 'PR' 
+              and not ld.u_state = 'PR'
+              and not (ls.u_state <> 'HI' and ld.u_state ='HI') 
+              and not (ls.u_state = 'HI' and ld.u_state <>'HI');
                RETURN V_distance;
            EXCEPTION
-          WHEN NO_DATA_FOUND THEN
-               RETURN SQLCODE;
+          when no_data_found then
+               RETURN 99999;
           WHEN OTHERS THEN
            v_code :=  sqlcode;
            V_ERRM := SUBSTR(SQLERRM, 1 , 64);
@@ -47,7 +51,7 @@
 
     exception
     when no_data_found then
-         return sqlcode;
+         return 99999;
     when others then
          v_code :=  sqlcode;
          v_errm := substr(sqlerrm, 1 , 64);

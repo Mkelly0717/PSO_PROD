@@ -6,13 +6,23 @@ set define off;
   CREATE OR REPLACE PROCEDURE "SCPOMGR"."U_15_SKU_DAILY" as
 
 
-v_safetystock_pen number;
+v_safetystock_pen  number;
+v_min_startdate    date;
+v_jda_inital_date  date;
 
 begin
 
   select numval1 into v_safetystock_pen
     from UDT_DEFAULT_PARAMETERS DFP
     where dfp.name='SAFETYSTOCK_PEN' ;
+    
+   -- Get the Minimum Start Date. 
+  select min(startdate)+14 into v_min_startdate 
+   from skuprojstatic;
+   
+  -- Get the JDA Inital date.
+  select V_INIT_EFF_DATE into v_jda_inital_date from dual;
+   
 --updated (for NA - 10/20/105)
 -- must run store sku projections first 
 
@@ -22,30 +32,23 @@ commit;
 
 --category 1 totdmd and category 6 mininflow / custorder
 
-insert into skuconstraint (item, loc, eff, dur, category, policy, qtyuom, qty)
+insert into igpmgr.intups_skuconstraint (item, loc, eff, dur, category, policy, qtyuom, qty)
 
-select item, loc, startdate eff, 1440*1 dur, category, 1 policy, 18 qtyuom, qty
+select  item, loc, startdate eff, 1440*1 dur, category, 1 policy, 18 qtyuom, qty
     from 
 
         (select s.item, s.loc, 1 category, trunc(s.startdate) startdate, round(s.adjalloctotfcst, 1)+round(s.adjfcstcustorders, 1)  qty
-        from skuprojstatic s, item i, loc l,
+        from skuprojstatic s, item i, loc l
         
-            (select distinct item, skuloc
-            from dfutoskufcst
-            where dmdgroup = 'ISS'
-            ) f
-        
-        where s.item = i.item
+         where s.item = i.item
         and i.u_stock = 'C'
         and s.loc = l.loc
         and l.u_area = 'NA' 
         and l.loc_type = 3
-        and s.item = f.item
-        and s.loc = f.skuloc
-        and trunc(s.startdate) <=  (select min(startdate)+14 from skuprojstatic)
+        and trunc(s.startdate) <=  v_min_startdate
 
         union
-        
+
         select s.item, s.loc, 6 category, trunc(s.startdate) startdate, round(s.adjfcstcustorders, 1)  qty
         from skuprojstatic s, item i, loc l
         where s.item = i.item
@@ -53,9 +56,9 @@ select item, loc, startdate eff, 1440*1 dur, category, 1 policy, 18 qtyuom, qty
         and s.loc = l.loc
         and l.u_area = 'NA' 
         and l.loc_type = 3
-        and trunc(s.startdate) <=  (select min(startdate)+14 from skuprojstatic)
-        
-        union
+        and trunc(s.startdate) <=  v_min_startdate
+
+        union        
         
         select s.item, s.loc, 10 category, trunc(s.startdate) startdate, round(s.adjalloctotfcst, 1)+round(s.adjfcstcustorders, 1)  qty --category 1 or 10 ?? 12/15/2015
         from skuprojstatic s, item i, loc l,
@@ -72,7 +75,7 @@ select item, loc, startdate eff, 1440*1 dur, category, 1 policy, 18 qtyuom, qty
         and l.loc_type = 4
         and s.item = f.item
         and s.loc = f.skuloc
-        and trunc(s.startdate) <=  (select min(startdate)+14 from skuprojstatic)
+        and trunc(s.startdate) <=  v_min_startdate
         
         union
         
@@ -93,7 +96,7 @@ select item, loc, startdate eff, 1440*1 dur, category, 1 policy, 18 qtyuom, qty
         and l.loc_type = 3
         and s.item = f.item
         and s.loc = f.skuloc
-        and trunc(s.startdate) <=  (select min(startdate)+14 from skuprojstatic)
+        and trunc(s.startdate) <=  v_min_startdate
         );
 
 commit;
@@ -175,7 +178,7 @@ commit;
 
 insert into skupenalty (eff, rate, category, item, loc, currencyuom, qtyuom)
 
-select distinct V_INIT_EFF_DATE EFF
+select distinct v_jda_inital_date EFF
   , v_safetystock_pen rate
   , 105 category
   , u.item

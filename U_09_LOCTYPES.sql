@@ -152,4 +152,51 @@ begin
         else u_max_dist
       end
     where l.u_area='NA'; 
+  
+  /******************************************************************
+** Part 8: loc.loc_type for vehicle loads locations
+*******************************************************************/
+merge into loc l
+using (
+select ld.loc loc
+from vehicleloadline vll, loc ld, custorder co
+where ld.loc=vll.dest
+  and ld.u_area='NA'
+  and ld.loc_type=6
+  and co.orderid=vll.orderid
+  and co.u_sales_document='Z1AA'
+union
+select ls.loc loc
+from vehicleloadline vll, loc ls, custorder co
+where ls.loc=vll.source
+  and ls.u_area='NA'
+  and ls.loc_type=6
+  and co.orderid=vll.orderid
+  and co.u_sales_document='Z1BA'
+) s
+on (l.loc=s.loc )
+when matched then update 
+      set l.loc_type=3;
+      
+merge into loc l
+using (
+select ld.loc loc
+from vehicleloadline vll, loc ld, custorder co
+where ld.loc=vll.dest
+  and ld.u_area='NA'
+  and ld.loc_type=6
+  and co.orderid=vll.orderid
+  and co.u_sales_document='Z1BA'
+union
+select ls.loc loc
+from vehicleloadline vll, loc ls, custorder co
+where ls.loc=vll.source
+  and ls.u_area='NA'
+  and ls.loc_type=6
+  and co.orderid=vll.orderid
+  and co.u_sales_document='Z1AA'
+) s
+on (l.loc=s.loc )
+when matched then update 
+      set l.loc_type=2;
 end;

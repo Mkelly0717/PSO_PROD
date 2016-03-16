@@ -19,4 +19,9 @@ u_100_igperror_hist_table;
 /* Run the Plan Extract Procedure to populate udt_planarriv_extract */
 scpomgr.u_60_create_planarriv_extract;
 
+/* Now run the New process to write to MAK_CUST_TABLE and MAK_PLANARRIV */
+scpomgr.mak_assign_orders_sma;
+
+scpomgr.mak_assign_planarrivals3;
+
 END U_93_PSTOPTIMIZER;
